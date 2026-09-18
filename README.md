@@ -1,6 +1,9 @@
 # TaskOps API
 API REST de gestion de tâches — projet fil rouge de la formation
 **B3 - DevOps : culture, outils et automatisation**.
+[![CI](https://github.com/QuentinBezille/taskops-api/actions/workflows/ci.yml/badge.svg)](https://github.com/QuentinBezille/taskops-api/actions/workflows/ci.yml)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=QuentinBezille_taskops-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=QuentinBezille_taskops-api)
 ## Stack
 | Composant | Version |
 |-------------|---------|
