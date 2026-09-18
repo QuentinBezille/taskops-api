@@ -1,0 +1,49 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
+jobs:
+  release:
+    name: Construire et publier la release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+      - name: Installer Java 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+      - name: Deduire la version depuis le tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Version deduite : $VERSION"
+      - name: Fixer la version dans le pom
+        run: ./mvnw -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
+      - name: Construire l'artefact
+        run: ./mvnw -B clean verify
+      - name: Verifier le contenu de l'artefact
+        run: |
+          ls -lh target/*.jar
+          unzip -p "target/taskops-api-${VERSION}.jar" BOOT-INF/classes/META-INF/build-info.properties
+      - name: Publier la release GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+          "target/taskops-api-${VERSION}.jar" \
+          --title "TaskOps API ${GITHUB_REF_NAME}" \
+          --generate-notes
+      - name: Conserver l'artefact comme artefact de workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: taskops-api-${{ env.VERSION }}
+          path: target/taskops-api-${{ env.VERSION }}.jar
+          retention-days: 30
